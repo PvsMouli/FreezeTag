@@ -13,5 +13,7 @@ UCLASS()
 class FREEZETAG_API UFTGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
-	
+
+public:
+	virtual void Init();
 };

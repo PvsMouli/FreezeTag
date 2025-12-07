@@ -1,3 +1,12 @@
+07-12-2025
+==========
+- Custom Log Category
+- Custom Log File
+
+06-12-2025
+==========
+- Custom Macros For Logging
+
 15-11-2025
 ==========
 - Created The Project
