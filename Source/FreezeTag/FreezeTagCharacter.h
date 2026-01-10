@@ -76,5 +76,7 @@ public:
 	void CallOpenLevel(const FString& Address);
 	UFUNCTION(BlueprintCallable)
 	void CallClientTravel(const FString& Address);
+
+	TSharedPtr<class IOnlineSession, ESPMode::ThreadSafe> OnlineSessionInterface;
 };
 
