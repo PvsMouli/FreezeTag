@@ -11,6 +11,9 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 
+#include "Kismet/GameplayStatics.h"
+
+
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 //////////////////////////////////////////////////////////////////////////
@@ -127,4 +130,21 @@ void AFreezeTagCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void AFreezeTagCharacter::OpenLobby()
+{
+	UWorld* World = GetWorld();
+	World->ServerTravel("/Game/FreezeTag/Levels/Lobby?listen");
+}
+
+void AFreezeTagCharacter::CallOpenLevel(const FString& Address)
+{
+	UGameplayStatics::OpenLevel(this, *Address);
+}
+
+void AFreezeTagCharacter::CallClientTravel(const FString& Address)
+{
+	GetGameInstance()->GetFirstLocalPlayerController()->ClientTravel(*Address, ETravelType::TRAVEL_Absolute);
+	//GetWorld()->GetFirstPlayerController()->ClientTravel(*Address, TRAVEL_Absolute);
 }

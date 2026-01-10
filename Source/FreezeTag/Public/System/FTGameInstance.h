@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-
+#include "OnlineSubsystem.h"
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "FTGameInstance.generated.h"
@@ -16,4 +16,7 @@ class FREEZETAG_API UFTGameInstance : public UGameInstance
 
 public:
 	virtual void Init();
+
+private:
+	IOnlineSessionPtr SessionInterface;
 };
