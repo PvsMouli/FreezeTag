@@ -13,16 +13,17 @@
 
 #include "Kismet/GameplayStatics.h"
 #include "OnlineSubsystem.h"
-#include "Interfaces/OnlineSessionInterface.h"
 #include "System/FTMacros.h"
 #include "System/FTLogger.h"
+#include "OnlineSessionSettings.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 //////////////////////////////////////////////////////////////////////////
 // AFreezeTagCharacter
 
-AFreezeTagCharacter::AFreezeTagCharacter()
+AFreezeTagCharacter::AFreezeTagCharacter() : 
+	CreateSessionCompleteDelegate(FOnCreateSessionCompleteDelegate::CreateUObject(this, &ThisClass::OnCreateSessionComplete))
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -161,4 +162,55 @@ void AFreezeTagCharacter::CallClientTravel(const FString& Address)
 {
 	GetGameInstance()->GetFirstLocalPlayerController()->ClientTravel(*Address, ETravelType::TRAVEL_Absolute);
 	//GetWorld()->GetFirstPlayerController()->ClientTravel(*Address, TRAVEL_Absolute);
+}
+
+void AFreezeTagCharacter::CreateGameSession()
+{
+	if (!OnlineSessionInterface.IsValid())
+	{
+		FString msg = FString::Printf(
+			TEXT("AFreezeTagCharacter::CreateGameSession No Online Session Interface found!"));
+		FTLogToFile(msg);
+		return;
+	}
+	//FNamedOnlineSession
+	auto ExistingSession = OnlineSessionInterface->GetNamedSession(NAME_GameSession);
+	if (ExistingSession != nullptr)
+	{
+		FString msg = FString::Printf(
+			TEXT("AFreezeTagCharacter::CreateGameSession Session already exists!"));
+		FTLogToFile(msg);
+		OnlineSessionInterface->DestroySession(NAME_GameSession);
+	}
+
+	OnlineSessionInterface->AddOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegate);
+
+	TSharedPtr<FOnlineSessionSettings> SessionSettings =
+		MakeShareable(new FOnlineSessionSettings());
+	SessionSettings->bIsLANMatch = false;
+	SessionSettings->NumPublicConnections = 4;
+	SessionSettings->bAllowJoinInProgress = true;
+	SessionSettings->bAllowJoinViaPresence = true;
+	SessionSettings->bShouldAdvertise = true;
+	SessionSettings->bUsesPresence = true;
+
+	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+	OnlineSessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *SessionSettings);
+}
+
+void AFreezeTagCharacter::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
+{
+	if (bWasSuccessful)
+	{
+		FString msg = FString::Printf(
+			TEXT("AFreezeTagCharacter::OnCreateSessionComplete Session created successfully!"));
+		FTLogToFile(msg);
+		//OpenLobby();
+	}
+	else
+	{
+		FString msg = FString::Printf(
+			TEXT("AFreezeTagCharacter::OnCreateSessionComplete Failed to create session!"));
+		FTLogToFile(msg);
+	}
 }

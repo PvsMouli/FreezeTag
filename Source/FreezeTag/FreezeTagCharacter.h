@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "Interfaces/OnlineSessionInterface.h"
 #include "FreezeTagCharacter.generated.h"
 
 class USpringArmComponent;
@@ -77,6 +78,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void CallClientTravel(const FString& Address);
 
-	TSharedPtr<class IOnlineSession, ESPMode::ThreadSafe> OnlineSessionInterface;
+	UFUNCTION(BlueprintCallable)
+	void CreateGameSession();
+
+	//TSharedPtr<class IOnlineSession, ESPMode::ThreadSafe> OnlineSessionInterface;
+	IOnlineSessionPtr OnlineSessionInterface;
+protected:
+	UFUNCTION(BlueprintCallable)
+	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
+	FOnCreateSessionCompleteDelegate CreateSessionCompleteDelegate;
 };
 
