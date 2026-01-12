@@ -3,6 +3,9 @@
 /Build
 /DerivedDataCache
 /Intermediate
+/Plugins/MultiplayerSessions/Binaries
+/Plugins/MultiplayerSessions/Intermediate
+/Plugins/MultiplayerSessions/Resources
 /Saved
 /Content/__ExternalObjects__
 /Content/__ExternalActors__
