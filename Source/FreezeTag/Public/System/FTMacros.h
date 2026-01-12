@@ -17,7 +17,7 @@ DECLARE_LOG_CATEGORY_EXTERN(FTMPLogs, Log, All);
  *  NETWORK-SPECIFIC LOGGING
  * ------------------------------------------------------------ */
 #define FTMP_LOG(Format, ...)       __LOG_BASE(FTMPLogs, Log, Format, ##__VA_ARGS__)
-#define FTLogToFile(Message)    FTLogger::LogToFile(Message)
+//#define FTLogToFile(Message)    FTLogger::LogToFile(Message)
 
 /**
  * 

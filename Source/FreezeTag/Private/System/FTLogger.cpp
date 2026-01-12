@@ -3,6 +3,8 @@
 
 #include "System/FTLogger.h"
 
+bool FTLogger::bIsLoggingEnabled = true;
+
 FTLogger::FTLogger()
 {
 }
@@ -11,15 +13,38 @@ FTLogger::~FTLogger()
 {
 }
 
-void FTLogger::LogToFile(const FString& Message)
+//void FTLogger::LogToFile(const FString& Message)
+//{
+//    FString FilePath = FPaths::ProjectLogDir() + TEXT("MyCustomLog.txt");
+//
+//    FString Final = FDateTime::Now().ToString() + TEXT(" : ") + Message + TEXT("\n");
+//
+//    FFileHelper::SaveStringToFile(Final, *FilePath,
+//        FFileHelper::EEncodingOptions::AutoDetect,
+//        &IFileManager::Get(),
+//        FILEWRITE_Append);
+//
+//    //UE_LOG(LogTemp, Log, TEXT("%s"), Message);
+//}
+
+void FTLogger::LogToFile(const FString& Message, bool bUseUeLog, bool bUseCustomLog)
 {
-    FString FilePath = FPaths::ProjectLogDir() + TEXT("MyCustomLog.txt");
-
-    FString Final = FDateTime::Now().ToString() + TEXT(" : ") + Message + TEXT("\n");
-
-    FFileHelper::SaveStringToFile(Final, *FilePath,
-        FFileHelper::EEncodingOptions::AutoDetect,
-        &IFileManager::Get(),
-        FILEWRITE_Append);
+	if (!bIsLoggingEnabled)
+	{
+		return;
+	}
+	if (bUseUeLog)
+	{
+		UE_LOG(LogTemp, Log, TEXT("%s"), *Message);
+	}
+	if (bUseCustomLog)
+	{
+		FString FilePath = FPaths::ProjectLogDir() + TEXT("MyCustomLog.txt");
+		FString Final = FDateTime::Now().ToString() + TEXT(" : ") + Message + TEXT("\n");
+		FFileHelper::SaveStringToFile(Final, *FilePath,
+			FFileHelper::EEncodingOptions::AutoDetect,
+			&IFileManager::Get(),
+			FILEWRITE_Append);
+	}
 }
 
