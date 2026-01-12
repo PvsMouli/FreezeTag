@@ -16,6 +16,7 @@
 #include "System/FTMacros.h"
 #include "System/FTLogger.h"
 #include "OnlineSessionSettings.h"
+#include "Online/OnlineSessionNames.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -23,7 +24,8 @@ DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 // AFreezeTagCharacter
 
 AFreezeTagCharacter::AFreezeTagCharacter() : 
-	CreateSessionCompleteDelegate(FOnCreateSessionCompleteDelegate::CreateUObject(this, &ThisClass::OnCreateSessionComplete))
+	CreateSessionCompleteDelegate(FOnCreateSessionCompleteDelegate::CreateUObject(this, &ThisClass::OnCreateSessionComplete)),
+	FindSessionsCompleteDelegate(FOnFindSessionsCompleteDelegate::CreateUObject(this, &ThisClass::OnFindSessionComplete))
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -193,9 +195,32 @@ void AFreezeTagCharacter::CreateGameSession()
 	SessionSettings->bAllowJoinViaPresence = true;
 	SessionSettings->bShouldAdvertise = true;
 	SessionSettings->bUsesPresence = true;
+	SessionSettings->bUseLobbiesIfAvailable = true;
 
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 	OnlineSessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *SessionSettings);
+
+}
+
+void AFreezeTagCharacter::JoinGameSession()
+{
+	if (!OnlineSessionInterface.IsValid())
+	{
+		FString msg = FString::Printf(
+			TEXT("AFreezeTagCharacter::JoinGameSession No Online Session Interface found!"));
+		FTLogToFile(msg);
+		return;
+	}
+
+	OnlineSessionInterface->AddOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegate);
+
+	SessionSearch = MakeShareable(new FOnlineSessionSearch());
+	SessionSearch->bIsLanQuery = false;
+	SessionSearch->MaxSearchResults = 1000;
+	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
+
+	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+	OnlineSessionInterface->FindSessions(*LocalPlayer->GetPreferredUniqueNetId(), SessionSearch.ToSharedRef());
 }
 
 void AFreezeTagCharacter::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
@@ -211,6 +236,28 @@ void AFreezeTagCharacter::OnCreateSessionComplete(FName SessionName, bool bWasSu
 	{
 		FString msg = FString::Printf(
 			TEXT("AFreezeTagCharacter::OnCreateSessionComplete Failed to create session!"));
+		FTLogToFile(msg);
+	}
+}
+
+void AFreezeTagCharacter::OnFindSessionComplete(bool bWasSuccessful)
+{
+	if (!bWasSuccessful)
+	{
+		FString msg = FString::Printf(
+			TEXT("AFreezeTagCharacter::OnFindSessionComplete Failed to find a session!"));
+		FTLogToFile(msg);
+		//OpenLobby();
+	}
+	for (auto Result : SessionSearch->SearchResults)
+	{
+		FString Id = Result.GetSessionIdStr();
+		FString user = Result.Session.OwningUserName;
+		FString msg = FString::Printf(
+			TEXT("AFreezeTagCharacter::OnFindSessionComplete Found session: %s from user: %s"),
+			*Id,
+			*user
+		);
 		FTLogToFile(msg);
 	}
 }
