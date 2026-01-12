@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 
+//By default custom logging(second parameter) is enabled, enbable UE logging as well by setting the first parameter to true
 #define FT_LOG(Message, ...) FTLogger::LogToFile(Message, ##__VA_ARGS__)
 
 /**

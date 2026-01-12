@@ -13,7 +13,7 @@
 
 #include "Kismet/GameplayStatics.h"
 #include "OnlineSubsystem.h"
-#include "System/FTMacros.h"
+//#include "System/FTMacros.h"
 #include "System/FTLogger.h"
 #include "OnlineSessionSettings.h"
 #include "Online/OnlineSessionNames.h"
@@ -25,7 +25,8 @@ DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 AFreezeTagCharacter::AFreezeTagCharacter() : 
 	CreateSessionCompleteDelegate(FOnCreateSessionCompleteDelegate::CreateUObject(this, &ThisClass::OnCreateSessionComplete)),
-	FindSessionsCompleteDelegate(FOnFindSessionsCompleteDelegate::CreateUObject(this, &ThisClass::OnFindSessionComplete))
+	FindSessionsCompleteDelegate(FOnFindSessionsCompleteDelegate::CreateUObject(this, &ThisClass::OnFindSessionComplete)),
+	JoinSessionCompleteDelegate(FOnJoinSessionCompleteDelegate::CreateUObject(this, &ThisClass::OnJoinSessionComplete))
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -197,6 +198,7 @@ void AFreezeTagCharacter::CreateGameSession()
 	SessionSettings->bShouldAdvertise = true;
 	SessionSettings->bUsesPresence = true;
 	SessionSettings->bUseLobbiesIfAvailable = true;
+	SessionSettings->Set(FName("MATCH_TYPE"), FString("FreeForAll"), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 	OnlineSessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *SessionSettings);
@@ -221,6 +223,7 @@ void AFreezeTagCharacter::JoinGameSession()
 	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+	FT_LOG("AFreezeTagCharacter::JoinGameSession Searching for sessions...", true);
 	OnlineSessionInterface->FindSessions(*LocalPlayer->GetPreferredUniqueNetId(), SessionSearch.ToSharedRef());
 }
 
@@ -228,10 +231,17 @@ void AFreezeTagCharacter::OnCreateSessionComplete(FName SessionName, bool bWasSu
 {
 	if (bWasSuccessful)
 	{
-		FString msg = FString::Printf(
+		/*FString msg = FString::Printf(
 			TEXT("AFreezeTagCharacter::OnCreateSessionComplete Session created successfully!"));
-		FT_LOG(msg);
+		FT_LOG(msg);*/
 		//OpenLobby();
+
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			FT_LOG(FString::Printf(TEXT("AFreezeTagCharacter::OnCreateSessionComplete Calling Server Travel")), true);
+			World->ServerTravel("/Game/FreezeTag/Levels/Lobby?listen");
+		}
 	}
 	else
 	{
@@ -243,6 +253,13 @@ void AFreezeTagCharacter::OnCreateSessionComplete(FName SessionName, bool bWasSu
 
 void AFreezeTagCharacter::OnFindSessionComplete(bool bWasSuccessful)
 {
+	if (!OnlineSessionInterface.IsValid())
+	{
+		FString msg = FString::Printf(
+			TEXT("AFreezeTagCharacter::OnFindSessionComplete No Online Session Interface found!"));
+		FT_LOG(msg);
+		return;
+	}
 	if (!bWasSuccessful)
 	{
 		FString msg = FString::Printf(
@@ -260,5 +277,43 @@ void AFreezeTagCharacter::OnFindSessionComplete(bool bWasSuccessful)
 			*user
 		);
 		FT_LOG(msg);
+		FString MatchType;
+		if (Result.Session.SessionSettings.Get(FName("MATCH_TYPE"), MatchType))
+		{
+			if (MatchType == "FreeForAll")
+			{
+				FT_LOG("AFreezeTagCharacter::OnFindSessionComplete Joining session FreeForAll", true);
+				const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+				OnlineSessionInterface->AddOnJoinSessionCompleteDelegate_Handle(JoinSessionCompleteDelegate);
+				OnlineSessionInterface->JoinSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, Result);
+				return;
+			}
+		}
+	}
+}
+
+void AFreezeTagCharacter::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
+{
+	if (!OnlineSessionInterface.IsValid())
+	{
+		FString msg = FString::Printf(
+			TEXT("AFreezeTagCharacter::OnJoinSessionComplete No Online Session Interface found!"));
+		FT_LOG(msg);
+		return;
+	}
+
+	FString Address;
+	if (OnlineSessionInterface->GetResolvedConnectString(NAME_GameSession, Address))
+	{
+		FT_LOG(FString::Printf(TEXT("AFreezeTagCharacter::OnJoinSessionComplete Joining session at address: %s"), *Address), true);
+		APlayerController* PlayerController = GetGameInstance()->GetFirstLocalPlayerController();
+		if (PlayerController)
+		{
+			PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
+		}
+		else
+		{
+			FT_LOG("AFreezeTagCharacter::OnJoinSessionComplete Failed to get PlayerController!", true);
+		}
 	}
 }
