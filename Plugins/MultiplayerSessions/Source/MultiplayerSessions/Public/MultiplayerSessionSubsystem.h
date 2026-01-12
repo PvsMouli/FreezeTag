@@ -15,7 +15,8 @@ class MULTIPLAYERSESSIONS_API UMultiplayerSessionSubsystem : public UGameInstanc
 {
 	GENERATED_BODY()
 public:
+	UMultiplayerSessionSubsystem();
 protected:
 private:
-	//IOnlineSessionPtr OnlineSessionPointer;
+	IOnlineSessionPtr OnlineSessionInterface;
 };
