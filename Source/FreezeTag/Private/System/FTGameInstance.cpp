@@ -7,7 +7,7 @@
 void UFTGameInstance::Init()
 {	
 	//Just for testing purpose
-	FTLogToFile("UFTGameInstance::Init");
+	FT_LOG("UFTGameInstance::Init", true, false);
 	//FTMP_LOG(" ");
-	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
+	//IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
 }

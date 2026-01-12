@@ -69,8 +69,9 @@ AFreezeTagCharacter::AFreezeTagCharacter() :
 		FString SubSystemName = FString::Printf(TEXT("Subsystem Name: %s"),
 			*OnlineSubSystem->GetSubsystemName().ToString()
 		);
-		FTLogToFile(SubSystemName);
-		//FTLogToFile(TEXT("SubSytem Name: %s"), *OnlineSubSystem->GetSubsystemName().ToString());
+		FT_LOG(SubSystemName, true);
+		//UE_LOG(LogTemp, Log, TEXT("%s"), *SubSystemName);
+		//GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, SubSystemName);		
 	}
 }
 
@@ -172,7 +173,7 @@ void AFreezeTagCharacter::CreateGameSession()
 	{
 		FString msg = FString::Printf(
 			TEXT("AFreezeTagCharacter::CreateGameSession No Online Session Interface found!"));
-		FTLogToFile(msg);
+		FT_LOG(msg);
 		return;
 	}
 	//FNamedOnlineSession
@@ -181,7 +182,7 @@ void AFreezeTagCharacter::CreateGameSession()
 	{
 		FString msg = FString::Printf(
 			TEXT("AFreezeTagCharacter::CreateGameSession Session already exists!"));
-		FTLogToFile(msg);
+		FT_LOG(msg);
 		OnlineSessionInterface->DestroySession(NAME_GameSession);
 	}
 
@@ -208,7 +209,7 @@ void AFreezeTagCharacter::JoinGameSession()
 	{
 		FString msg = FString::Printf(
 			TEXT("AFreezeTagCharacter::JoinGameSession No Online Session Interface found!"));
-		FTLogToFile(msg);
+		FT_LOG(msg);
 		return;
 	}
 
@@ -229,14 +230,14 @@ void AFreezeTagCharacter::OnCreateSessionComplete(FName SessionName, bool bWasSu
 	{
 		FString msg = FString::Printf(
 			TEXT("AFreezeTagCharacter::OnCreateSessionComplete Session created successfully!"));
-		FTLogToFile(msg);
+		FT_LOG(msg);
 		//OpenLobby();
 	}
 	else
 	{
 		FString msg = FString::Printf(
 			TEXT("AFreezeTagCharacter::OnCreateSessionComplete Failed to create session!"));
-		FTLogToFile(msg);
+		FT_LOG(msg);
 	}
 }
 
@@ -246,7 +247,7 @@ void AFreezeTagCharacter::OnFindSessionComplete(bool bWasSuccessful)
 	{
 		FString msg = FString::Printf(
 			TEXT("AFreezeTagCharacter::OnFindSessionComplete Failed to find a session!"));
-		FTLogToFile(msg);
+		FT_LOG(msg);
 		//OpenLobby();
 	}
 	for (auto Result : SessionSearch->SearchResults)
@@ -258,6 +259,6 @@ void AFreezeTagCharacter::OnFindSessionComplete(bool bWasSuccessful)
 			*Id,
 			*user
 		);
-		FTLogToFile(msg);
+		FT_LOG(msg);
 	}
 }
