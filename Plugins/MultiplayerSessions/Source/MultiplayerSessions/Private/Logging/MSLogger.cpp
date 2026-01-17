@@ -3,6 +3,8 @@
 
 #include "Logging/MSLogger.h"
 
+bool MSLogger::bIsLoggingEnabled = true;
+
 MSLogger::MSLogger()
 {
 }

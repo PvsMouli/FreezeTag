@@ -17,6 +17,7 @@
 #include "System/FTLogger.h"
 #include "OnlineSessionSettings.h"
 #include "Online/OnlineSessionNames.h"
+#include "Widgets/MenuWidget.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -28,6 +29,7 @@ AFreezeTagCharacter::AFreezeTagCharacter() :
 	FindSessionsCompleteDelegate(FOnFindSessionsCompleteDelegate::CreateUObject(this, &ThisClass::OnFindSessionComplete)),
 	JoinSessionCompleteDelegate(FOnJoinSessionCompleteDelegate::CreateUObject(this, &ThisClass::OnJoinSessionComplete))
 {
+
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 		
@@ -80,6 +82,27 @@ void AFreezeTagCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+
+	/*
+	* Error WidgetTree Didn't FInd While Creating Widget in eventbeginplay from blueprint, As Soon as project is restarted
+	* So Moving this code to C++
+	*/
+	if (!MenuWidgetClass.IsNull())
+	{
+		UClass* LoadedClass = MenuWidgetClass.LoadSynchronous();
+		MenuWidgetInstance = CreateWidget<UUserWidget>(GetWorld(), LoadedClass);
+
+		if (MenuWidgetInstance)
+		{
+			//MenuWidgetInstance->AddToViewport();
+			UMenuWidget* Menu = Cast<UMenuWidget>(MenuWidgetInstance);
+			if (Menu)
+			{
+				Menu->MenuSetup();
+			}
+		}
+
+	}
 
 	//Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))

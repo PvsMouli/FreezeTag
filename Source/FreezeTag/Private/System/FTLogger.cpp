@@ -39,7 +39,7 @@ void FTLogger::LogToFile(const FString& Message, bool bUseUeLog, bool bUseCustom
 	}
 	if (bUseCustomLog)
 	{
-		FString FilePath = FPaths::ProjectLogDir() + TEXT("MyCustomLog.txt");
+		FString FilePath = FPaths::ProjectLogDir() + TEXT("FTLogs.txt");
 		FString Final = FDateTime::Now().ToString() + TEXT(" : ") + Message + TEXT("\n");
 		FFileHelper::SaveStringToFile(Final, *FilePath,
 			FFileHelper::EEncodingOptions::AutoDetect,

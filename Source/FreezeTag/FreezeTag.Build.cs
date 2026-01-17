@@ -8,6 +8,8 @@ public class FreezeTag : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "OnlineSubsystem", "OnlineSubsystemUtils", "OnlineSubsystemSteam" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore",
+			"EnhancedInput","UMG", "Slate", "SlateCore", "OnlineSubsystem", "OnlineSubsystemUtils",
+			"OnlineSubsystemSteam", "MultiplayerSessions"}); 
 	}
 }

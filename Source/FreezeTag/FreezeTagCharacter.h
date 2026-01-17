@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "Interfaces/OnlineSessionInterface.h"
+#include "Blueprint/UserWidget.h"
 #include "FreezeTagCharacter.generated.h"
 
 class USpringArmComponent;
@@ -66,6 +67,12 @@ protected:
 	virtual void BeginPlay();
 
 public:
+	UPROPERTY(EditAnywhere)
+	TSoftClassPtr<UUserWidget> MenuWidgetClass;
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget> MenuWidgetInstance;
+
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
@@ -95,5 +102,6 @@ protected:
 	FOnJoinSessionCompleteDelegate JoinSessionCompleteDelegate;
 private:
 	TSharedPtr<FOnlineSessionSearch> SessionSearch;
+	
 };
 

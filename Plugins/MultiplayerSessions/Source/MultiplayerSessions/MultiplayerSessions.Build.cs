@@ -25,9 +25,14 @@ public class MultiplayerSessions : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"Core",
+                "CoreUObject",
+                "Engine",
+                "Core",
                 "OnlineSubsystem",
-				"OnlineSubsystemSteam"
+				"OnlineSubsystemSteam",
+				"UMG",
+				"Slate",
+                "SlateCore"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
@@ -36,10 +41,10 @@ public class MultiplayerSessions : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"CoreUObject",
+				/*"CoreUObject",
 				"Engine",
 				"Slate",
-				"SlateCore",
+				"SlateCore",*/
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
