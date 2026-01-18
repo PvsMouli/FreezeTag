@@ -6,6 +6,7 @@
 
 void UFTGameInstance::Init()
 {	
+	Super::Init();
 	//Just for testing purpose
 	FT_LOG("UFTGameInstance::Init", true, false);
 	//FTMP_LOG(" ");

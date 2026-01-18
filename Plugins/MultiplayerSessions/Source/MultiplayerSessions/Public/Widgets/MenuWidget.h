@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "MenuWidget.generated.h"
+class UMultiplayerSessionSubsystem;
 
 /**
  * 
@@ -17,15 +18,19 @@ class MULTIPLAYERSESSIONS_API UMenuWidget : public UUserWidget
 public:
 	//Called from character blueprint event begin play
 	UFUNCTION(BlueprintCallable)
-	void MenuSetup();
+	void MenuSetup(int NumberOfPublicConnection = 4, FString TypeOfMatch = "FreeForAll");
 protected:
 	/*
 	* Removed this becuase sometimes intialize is not getting called so I was returning false without
 	* calling super which in turn caused another crash in MenuSetup() SetVisibility() function becuase
 	* SuperIntialize() is not called it didn't get constructed casuing access violation error
 	*/
-	//virtual bool Initialize() override;
+	virtual bool Initialize() override;
+	virtual void NativeDestruct() override;
 private:
+	UFUNCTION()
+	void OnCreateSession(bool bWasSuccessful);
+
 	UPROPERTY(meta = (BindWidget))
 	class UButton* ButtonHost;
 
@@ -36,4 +41,10 @@ private:
 	void HostButtonClicked();
 	UFUNCTION()
 	void JoinButtonClicked();
+
+	UFUNCTION()
+	void MenuTearDown();
+
+	UPROPERTY()
+	TObjectPtr<UMultiplayerSessionSubsystem> MultiplayerSessionSubsystem;
 };

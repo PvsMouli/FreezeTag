@@ -4,8 +4,9 @@
 #include "Widgets/MenuWidget.h"
 #include "Logging/MSLogger.h"
 #include "Components/Button.h"
+#include "MultiplayerSessionSubsystem.h"
 
-void UMenuWidget::MenuSetup()
+void UMenuWidget::MenuSetup(int NumberOfPublicConnection, FString TypeOfMatch)
 {
 	MS_LOG("UMenuWidget::MenuSetup", true);
 	AddToViewport();
@@ -23,7 +24,7 @@ void UMenuWidget::MenuSetup()
 			InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 			PlayerController->SetInputMode(InputModeData);
 			PlayerController->bShowMouseCursor = true;
-			MS_LOG("UMenuWidget::MenuSetup: Input mode set to UI only and mouse cursor shown.", true);
+			//MS_LOG("UMenuWidget::MenuSetup: Input mode set to UI only and mouse cursor shown.", true);
 		}
 		/*else
 		{
@@ -53,43 +54,111 @@ void UMenuWidget::MenuSetup()
 	{
 		MS_LOG("UMenuWidget::Initialize: ButtonJoin is null!", false, true);
 	}
+
+	UGameInstance* GameInstance = GetGameInstance();
+	if (GameInstance)
+	{
+		MultiplayerSessionSubsystem = GameInstance->GetSubsystem<UMultiplayerSessionSubsystem>();
+		if (MultiplayerSessionSubsystem)
+		{
+			MS_LOG("UMenuWidget::MenuSetup: MultiplayerSessionSubsystem found.", true);
+			MultiplayerSessionSubsystem->OnMultiplayerCreateSessionComplete.AddUObject(this, &UMenuWidget::OnCreateSession);
+		}
+		else
+		{
+			MS_LOG("UMenuWidget::MenuSetup: MultiplayerSessionSubsystem is null!", true);
+		}
+	}
 }
 
-//bool UMenuWidget::Initialize()
-//{
-//	return false; //Initialize is not getting called properly, so returning false to prevent crashes
-//
-//	MS_LOG("UMenuWidget::Initialize: ",false, true);
-//	if (!Super::Initialize())
-//	{
-//		MS_LOG("UMenuWidget::Initialize: Super::Initialize() failed!",false, true);
-//		return false;
-//	}
-//	if (ButtonHost)
-//	{
-//		ButtonHost->OnClicked.AddDynamic(this, &UMenuWidget::HostButtonClicked);
-//	}
-//	else
-//	{
-//		MS_LOG("UMenuWidget::Initialize: ButtonHost is null!",false, true);
-//	}
-//	if (ButtonJoin)
-//	{
-//		ButtonJoin->OnClicked.AddDynamic(this, &UMenuWidget::JoinButtonClicked);
-//	}
-//	else
-//	{
-//		MS_LOG("UMenuWidget::Initialize: ButtonJoin is null!",false, true);
-//	}
-//	return false;
-//}
+bool UMenuWidget::Initialize()
+{
+	Super::Initialize();
+	MS_LOG("UMenuWidget::Initialize: ", true);
+	return false; //Initialize is not getting called properly, so returning false to prevent crashes
+
+	/*MS_LOG("UMenuWidget::Initialize: ",false, true);
+	if (!Super::Initialize())
+	{
+		MS_LOG("UMenuWidget::Initialize: Super::Initialize() failed!",false, true);
+		return false;
+	}
+	if (ButtonHost)
+	{
+		ButtonHost->OnClicked.AddDynamic(this, &UMenuWidget::HostButtonClicked);
+	}
+	else
+	{
+		MS_LOG("UMenuWidget::Initialize: ButtonHost is null!",false, true);
+	}
+	if (ButtonJoin)
+	{
+		ButtonJoin->OnClicked.AddDynamic(this, &UMenuWidget::JoinButtonClicked);
+	}
+	else
+	{
+		MS_LOG("UMenuWidget::Initialize: ButtonJoin is null!",false, true);
+	}
+	return false;*/
+}
+
+void UMenuWidget::NativeDestruct()
+{
+	Super::NativeDestruct();
+	MenuTearDown();
+}
+
+void UMenuWidget::OnCreateSession(bool bWasSuccessful)
+{
+	if (bWasSuccessful)
+	{
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			World->ServerTravel("/Game/FreezeTag/Levels/Lobby?listen");
+			MS_LOG("UMenuWidget::OnCreateSession: Server traveling to Lobby.", true);
+		}
+	}	
+	else
+	{
+		MS_LOG("UMenuWidget::OnCreateSession: Failed to create session!", true);
+	}
+}
 
 void UMenuWidget::HostButtonClicked()
 {
 	MS_LOG("UMenuWidget::HostButtonClicked", true);
+	if (MultiplayerSessionSubsystem)
+	{
+		MultiplayerSessionSubsystem->CreateSession(4, FString("FreeForAll"));		
+	}
+	else
+	{
+		MS_LOG("UMenuWidget::HostButtonClicked: MultiplayerSessionSubsystem is null!", true);
+	}
 }
 
 void UMenuWidget::JoinButtonClicked()
 {
 	MS_LOG("UMenuWidget::JoinButtonClicked", true);
+}
+
+void UMenuWidget::MenuTearDown()
+{
+	MS_LOG("UMenuWidget::MenuTearDown", true);
+	RemoveFromViewport();
+	SetVisibility(ESlateVisibility::Hidden);
+	bIsFocusable = false;
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		APlayerController* PlayerController = World->GetFirstPlayerController();
+		if (PlayerController)
+		{
+			FInputModeGameOnly InputModeData;
+			PlayerController->SetInputMode(InputModeData);
+			PlayerController->bShowMouseCursor = false;
+			//MS_LOG("UMenuWidget::MenuTearDown: Input mode set to Game only and mouse cursor hidden.", true);
+		}
+	}
 }

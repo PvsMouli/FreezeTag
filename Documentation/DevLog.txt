@@ -1,3 +1,13 @@
+18-01-2025
+===========
+- When Host Button Is Clicked
+  - Creating New Session
+  - Server Travel To Lobby
+
+17-01-2026
+===========
+- Created Main Menu Widget
+
 07-12-2025
 ==========
 - Custom Log Category
