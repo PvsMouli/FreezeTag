@@ -5,6 +5,7 @@
 #include "Logging/MSLogger.h"
 #include "Components/Button.h"
 #include "MultiplayerSessionSubsystem.h"
+#include "OnlineSessionSettings.h"
 
 void UMenuWidget::MenuSetup(int NumberOfPublicConnection, FString TypeOfMatch)
 {
@@ -62,7 +63,11 @@ void UMenuWidget::MenuSetup(int NumberOfPublicConnection, FString TypeOfMatch)
 		if (MultiplayerSessionSubsystem)
 		{
 			MS_LOG("UMenuWidget::MenuSetup: MultiplayerSessionSubsystem found.", true);
-			MultiplayerSessionSubsystem->OnMultiplayerCreateSessionComplete.AddUObject(this, &UMenuWidget::OnCreateSession);
+			MultiplayerSessionSubsystem->OnMultiplayerCreateSessionComplete.AddDynamic(this, &UMenuWidget::OnCreateSession);
+			MultiplayerSessionSubsystem->OnMultiplayerFindSessionsComplete.AddUObject(this, &UMenuWidget::OnFindSessions);
+			MultiplayerSessionSubsystem->OnMultiplayerJoinSessionComplete.AddUObject(this, &UMenuWidget::OnJoinSession);
+			MultiplayerSessionSubsystem->OnMultiplayerDestroySessionComplete.AddDynamic(this, &UMenuWidget::OnDestroySession);
+			MultiplayerSessionSubsystem->OnMultiplayerStartSessionComplete.AddDynamic(this, &UMenuWidget::OnStartSession);
 		}
 		else
 		{
@@ -123,6 +128,22 @@ void UMenuWidget::OnCreateSession(bool bWasSuccessful)
 	{
 		MS_LOG("UMenuWidget::OnCreateSession: Failed to create session!", true);
 	}
+}
+
+void UMenuWidget::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful)
+{
+}
+
+void UMenuWidget::OnJoinSession(EOnJoinSessionCompleteResult::Type Result, const FString& address)
+{
+}
+
+void UMenuWidget::OnDestroySession(bool bWasSuccessful)
+{
+}
+
+void UMenuWidget::OnStartSession(bool bWasSuccessful)
+{
 }
 
 void UMenuWidget::HostButtonClicked()

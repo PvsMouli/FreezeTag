@@ -88,7 +88,7 @@ void UMultiplayerSessionSubsystem::OnCreateSessionComplete(FName SessionName, bo
 	{
 		OnlineSessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegateHandle);
 	}
-	OnMultiplayerCreateSessionComplete.Broadcast(bWasSuccessful);
+	OnMultiplayerCreateSessionComplete.Broadcast(bWasSuccessful);	
 }
 
 void UMultiplayerSessionSubsystem::OnFindSessionsComplete(bool bWasSuccessful)

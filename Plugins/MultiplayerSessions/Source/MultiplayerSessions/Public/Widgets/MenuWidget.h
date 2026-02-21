@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Interfaces/OnlineSessionInterface.h"
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "MenuWidget.generated.h"
@@ -28,8 +29,14 @@ protected:
 	virtual bool Initialize() override;
 	virtual void NativeDestruct() override;
 private:
-	UFUNCTION()
+	UFUNCTION()	
 	void OnCreateSession(bool bWasSuccessful);
+	void OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful);
+	void OnJoinSession(EOnJoinSessionCompleteResult::Type Result, const FString& address);
+	UFUNCTION()
+	void OnDestroySession(bool bWasSuccessful);
+	UFUNCTION()
+	void OnStartSession(bool bWasSuccessful);
 
 	UPROPERTY(meta = (BindWidget))
 	class UButton* ButtonHost;

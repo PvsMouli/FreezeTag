@@ -9,7 +9,14 @@
 
 class FOnlineSessionSettings;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FMultiplayerOnCreateSessionComplete, bool /*bWasSuccessful*/);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMultiplayerOnCreateSessionComplete, bool, bWasSuccessful);
+//DECLARE_MULTICAST_DELEGATE_OneParam(FMultiplayerOnCreateSessionComplete, bool);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FMultiplayerOnFindSessionsComplete, const TArray<FOnlineSessionSearchResult>&, bool);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FMultiplayerOnJoinSessionComplete, EOnJoinSessionCompleteResult::Type, const FString&);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMultiplayerOnDestroySessionComplete, bool, bWasSuccessful);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMultiplayerOnStartSessionComplete, bool, bWasSuccessful);
+//DECLARE_MULTICAST_DELEGATE_OneParam(FMultiplayerOnDestroySessionComplete, bool);
+//DECLARE_MULTICAST_DELEGATE_OneParam(FMultiplayerOnStartSessionComplete, bool);
 
 /**
  * 
@@ -26,6 +33,11 @@ public:
 	void DestroySession();
 	void StartSession();
 	FMultiplayerOnCreateSessionComplete OnMultiplayerCreateSessionComplete;
+	FMultiplayerOnFindSessionsComplete OnMultiplayerFindSessionsComplete;
+	FMultiplayerOnJoinSessionComplete OnMultiplayerJoinSessionComplete;
+	FMultiplayerOnDestroySessionComplete OnMultiplayerDestroySessionComplete;
+	FMultiplayerOnStartSessionComplete OnMultiplayerStartSessionComplete;
+
 protected:
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 	void OnFindSessionsComplete(bool bWasSuccessful);
@@ -36,7 +48,6 @@ protected:
 private:
 	IOnlineSessionPtr OnlineSessionInterface;
 	TSharedPtr<FOnlineSessionSettings> LastSessionSettings;
-
 	FOnCreateSessionCompleteDelegate CreateSessionCompleteDelegate;
 	FDelegateHandle CreateSessionCompleteDelegateHandle;
 	FOnFindSessionsCompleteDelegate FindSessionsCompleteDelegate;
