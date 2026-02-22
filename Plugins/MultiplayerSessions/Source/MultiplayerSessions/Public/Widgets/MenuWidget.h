@@ -32,7 +32,7 @@ private:
 	UFUNCTION()	
 	void OnCreateSession(bool bWasSuccessful);
 	void OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful);
-	void OnJoinSession(EOnJoinSessionCompleteResult::Type Result, const FString& address);
+	void OnJoinSession(EOnJoinSessionCompleteResult::Type Result/*, const FString& address*/);
 	UFUNCTION()
 	void OnDestroySession(bool bWasSuccessful);
 	UFUNCTION()
@@ -54,4 +54,7 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UMultiplayerSessionSubsystem> MultiplayerSessionSubsystem;
+
+	int32 NumPublicConnections{ 4 };
+	FString MatchType{ TEXT("FreeForAll") };
 };

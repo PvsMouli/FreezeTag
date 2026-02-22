@@ -28,7 +28,10 @@
 		{
 			"Name": "MultiplayerSessions",
 			"Enabled": true
+		},
+		{
+			"Name": "SteamSockets",
+			"Enabled": true
 		}
-		
 	]
 }

@@ -6,6 +6,7 @@
 #include "Components/Button.h"
 #include "MultiplayerSessionSubsystem.h"
 #include "OnlineSessionSettings.h"
+#include "Interfaces/OnlineSessionInterface.h"
 
 void UMenuWidget::MenuSetup(int NumberOfPublicConnection, FString TypeOfMatch)
 {
@@ -132,10 +133,45 @@ void UMenuWidget::OnCreateSession(bool bWasSuccessful)
 
 void UMenuWidget::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful)
 {
+	MS_LOG("UMenuWidget::OnFindSessions:", true);
+	if (MultiplayerSessionSubsystem == nullptr)
+	{
+		MS_LOG("UMenuWidget::OnFindSessions: MultiplayerSessionSubsystem is null!", true);
+		return;
+	}
+
+	for (auto Result : SessionResults)
+	{
+		FString ServerName;
+		Result.Session.SessionSettings.Get(FName("MATCH_TYPE"), ServerName);
+		if (ServerName == FString("FreeForAll"))
+		{
+			MultiplayerSessionSubsystem->JoinSession(Result);
+			return;
+		}
+	}
 }
 
-void UMenuWidget::OnJoinSession(EOnJoinSessionCompleteResult::Type Result, const FString& address)
+void UMenuWidget::OnJoinSession(EOnJoinSessionCompleteResult::Type Result/*, const FString& address*/)
 {
+	IOnlineSessionPtr OnlineSessionInterface = IOnlineSubsystem::Get()->GetSessionInterface();
+	if (OnlineSessionInterface.IsValid())
+	{
+		FString Address;
+		OnlineSessionInterface->GetResolvedConnectString(NAME_GameSession, Address);
+
+		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+		if (PlayerController)
+		{
+			PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
+			MS_LOG("UMenuWidget::OnJoinSession: Client traveling to session at address: " + Address, true);
+		}
+
+	}
+	else
+	{
+		MS_LOG("UMenuWidget::OnJoinSession: Online Session Interface is invalid!", true);
+	}
 }
 
 void UMenuWidget::OnDestroySession(bool bWasSuccessful)
@@ -151,6 +187,7 @@ void UMenuWidget::HostButtonClicked()
 	MS_LOG("UMenuWidget::HostButtonClicked", true);
 	if (MultiplayerSessionSubsystem)
 	{
+		//TEXT("FreeForAll")
 		MultiplayerSessionSubsystem->CreateSession(4, FString("FreeForAll"));		
 	}
 	else
@@ -162,6 +199,10 @@ void UMenuWidget::HostButtonClicked()
 void UMenuWidget::JoinButtonClicked()
 {
 	MS_LOG("UMenuWidget::JoinButtonClicked", true);
+	if (MultiplayerSessionSubsystem)
+	{
+		MultiplayerSessionSubsystem->FindSessions(10000);
+	}
 }
 
 void UMenuWidget::MenuTearDown()
